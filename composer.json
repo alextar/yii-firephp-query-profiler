@@ -2,6 +2,7 @@
     "name": "alextar/yii2-firephp-query-profiler",
     "description": "profile db queries using firephp",
     "keywords": ["firephp", "firebug", "yii", "yii2", "logging", "log", "profiling", "profile"],
+    "type": "yii2-extension",
     "license": "MIT",
     "authors": [
         {
@@ -12,6 +13,7 @@
     "minimum-stability": "dev",
     "require": {
       "php": ">=5.4.0",
+      "yiisoft/yii2": "*",
       "firephp/firephp-core": ">=0.4.0"
     },
     "extra": {

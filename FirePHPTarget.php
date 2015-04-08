@@ -19,6 +19,7 @@ class FirePHPTarget extends Target
 
     public $profile = true;
     public $explain = false;
+    public $categories = ['yii\db\Command::query', 'yii\db\Command::execute'];
     protected $_timings;
     protected $_fp;
 
