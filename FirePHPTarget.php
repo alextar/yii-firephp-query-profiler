@@ -17,6 +17,8 @@ ob_start();
 class FirePHPTarget extends Target
 {
 
+    public $profile = true;
+    public $explain = false;
     protected $_timings;
     protected $_fp;
 
@@ -40,16 +42,18 @@ class FirePHPTarget extends Target
      */
     public function collect($messages, $final)
     {
-        $this->messages = array_merge($this->messages, $this->filterMessages($messages, $this->getLevels(), $this->categories, $this->except));
-        $count = count($this->messages);
-        if ($count > 0 && ($final || $this->exportInterval > 0 && $count >= $this->exportInterval)) {
-            // set exportInterval to 0 to avoid triggering export again while exporting
-            $oldExportInterval = $this->exportInterval;
-            $this->exportInterval = 0;
-            $this->export();
-            $this->exportInterval = $oldExportInterval;
+        if ($this->profile) {
+            $this->messages = array_merge($this->messages, $this->filterMessages($messages, $this->getLevels(), $this->categories, $this->except));
+            $count = count($this->messages);
+            if ($count > 0 && ($final || $this->exportInterval > 0 && $count >= $this->exportInterval)) {
+                // set exportInterval to 0 to avoid triggering export again while exporting
+                $oldExportInterval = $this->exportInterval;
+                $this->exportInterval = 0;
+                $this->export();
+                $this->exportInterval = $oldExportInterval;
 
-            $this->messages = [];
+                $this->messages = [];
+            }
         }
     }
 
@@ -102,40 +106,24 @@ class FirePHPTarget extends Target
      */
     public function export()
     {
-        $queries = [['SQL Statement','Time']];
 
         try {
             $this->getSummary($this->messages);
             foreach ($this->messages as $key => $message) {
 
                 switch ($message[1]) {
-//                    case Logger::LEVEL_ERROR:
-//                        $firephp->error($message[0], $message[2]);
-//                        break;
-//                    case Logger::LEVEL_WARNING:
-//                        $firephp->warn($message[0], $message[2]);
-//                        break;
-//                    case Logger::LEVEL_INFO:
-//                        $firephp->info($message[0], $message[2]);
-//                        break;
-//                    case Logger::LEVEL_TRACE:
-//                        $firephp->log($message[0]);
-//                        break;
-//                    default:
-//                        $firephp->log($message[0], $message[2]);
-//                        break;
-//                    case Logger::LEVEL_PROFILE:
-//                        $firephp->log($message[0], $message[2]);
-//                        break;
-//                    case Logger::LEVEL_PROFILE_BEGIN:
-//                        $firephp->log($message[0], $message[2]);
-//                        break;
                     case Logger::LEVEL_PROFILE_END:
-                        $queries[] = [preg_replace('/\s+/', ' ', trim($message[0])), $message[3] - $this->messages[$key - 1][3]];
+                        $command = preg_replace('/\s+/', ' ', trim($message[0]));
+                        $this->_fp->table(strtoupper($command), [['Time', 'Log info'], [$message[3] - $this->messages[$key - 1][3], $message]] );
+                        if($this->explain && preg_match("/(SELECT|UPDATE|DELETE|INSERT)/i", $command)) {
+                            $command = 'EXPLAIN ' . $command;
+                            $data = Yii::$app->db->createCommand($command)->queryAll();
+                            array_unshift($data, array_keys($data[0]));
+                            $this->_fp->table($command, $data);
+                        }
                         break;
                 }
             }
-                $this->_fp->table('All queries',$queries);
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
