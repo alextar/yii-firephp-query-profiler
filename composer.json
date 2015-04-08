@@ -1,0 +1,27 @@
+{
+    "name": "alextar/yii2-firephp-query-profiler",
+    "description": "profile db queries using firephp",
+    "keywords": ["firephp", "firebug", "yii", "yii2", "logging", "log", "profiling", "profile"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alex Tarasenko",
+            "email": "alextar.21@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+      "php": ">=5.4.0",
+      "firephp/firephp-core": ">=0.4.0"
+    },
+    "extra": {
+      "branch-alias": {
+        "dev-master": "0.1.x-dev"
+      }
+    },
+    "autoload": {
+      "psr-4": {
+        "alextar\\log\\": ""
+      }
+    }
+}
